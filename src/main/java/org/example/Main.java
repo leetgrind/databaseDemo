@@ -1,16 +1,17 @@
 package org.example;
 
 import java.sql.*;
+import java.util.UUID;
 
 public class Main {
     public static void main(String[] args) {
 
         // try catch with resources
 
-        try(Connection conn = DriverManager.
-                getConnection("jdbc:postgresql://localhost:5432/postgres",
-                        "postgres",
-                        "123456")) {
+        try {
+            Class.forName("org.sqlite.JDBC");
+            Connection conn = DriverManager.
+                    getConnection("jdbc:sqlite:test.db");
 
             if(conn!=null) {
                 System.out.println("Connected to the database");
@@ -21,29 +22,19 @@ public class Main {
 
             Statement statement = conn.createStatement();
 
-            //String query = "create table student(id int primary key, name varchar(20));";
+            String createTableQuery = "CREATE TABLE AUTHOR (ID VARCHAR(100), NAME VARCHAR(20), BOOK VARCHAR(20));";
+            UUID uuid = UUID.randomUUID();
+            String insertQuery = "INSERT INTO AUTHOR VALUES('" + uuid.toString() +"', 'JOHN', 'LEARN PROGRAMMING');";
+            // c35a066e-5eed-4a21-a33c-85d6ce3d67bc
+            System.out.println(insertQuery);
 
-            //String query = "INSERT INTO STUDENT VALUES(2, 'Amy');";
-
-            String query = "SELECT * FROM STUDENT;";
-
-            ResultSet rs = statement.executeQuery(query);
-
-            while (rs.next()) {
-
-                int id = rs.getInt("ID");
-                String name = rs.getString("NAME");
-
-                System.out.println("ID: " + id + ", Name: " + name);
-
-            }
-
-            //int result = statement.executeUpdate(query);
-
-            //System.out.println("Query executed with result: " + result);
-
+            int result = statement.executeUpdate(insertQuery);
+            System.out.println("Result is :" + result);
             statement.close();
+
         } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
 
