@@ -1,5 +1,7 @@
 package org.example;
 
+import com.github.javafaker.Faker;
+
 import java.sql.*;
 import java.util.UUID;
 
@@ -9,9 +11,11 @@ public class Main {
         // try catch with resources
 
         try {
-            Class.forName("org.sqlite.JDBC");
+            Class.forName("org.postgresql.Driver");
             Connection conn = DriverManager.
-                    getConnection("jdbc:sqlite:test.db");
+                    getConnection("jdbc:postgresql://localhost:5432/postgres",
+                            "postgres",
+                            "123456");
 
             if(conn!=null) {
                 System.out.println("Connected to the database");
@@ -20,16 +24,28 @@ public class Main {
                 System.out.println("Failed to connect to the database");
             }
 
-            Statement statement = conn.createStatement();
+            Statement statement = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                    ResultSet.CONCUR_UPDATABLE);
 
             String createTableQuery = "CREATE TABLE AUTHOR (ID VARCHAR(100), NAME VARCHAR(20), BOOK VARCHAR(20));";
-            UUID uuid = UUID.randomUUID();
-            String insertQuery = "INSERT INTO AUTHOR VALUES('" + uuid.toString() +"', 'JOHN', 'LEARN PROGRAMMING');";
-            // c35a066e-5eed-4a21-a33c-85d6ce3d67bc
-            System.out.println(insertQuery);
 
-            int result = statement.executeUpdate(insertQuery);
-            System.out.println("Result is :" + result);
+            String selectQuery = "SELECT * FROM AUTHOR";
+
+            Faker faker = new Faker();
+
+            ResultSet rs = statement.executeQuery(selectQuery);
+
+            String name = faker.name().firstName();
+            String bookName = faker.book().title();
+
+            rs.moveToInsertRow();
+            rs.updateString("ID", UUID.randomUUID().toString());
+            rs.updateString("NAME", name);
+            rs.updateString("BOOK", bookName);
+            rs.insertRow();
+
+            System.out.println("Row inserted with book name " + bookName);
+
             statement.close();
 
         } catch (SQLException e) {
