@@ -17,6 +17,7 @@ public class Main {
                             "postgres",
                             "123456");
 
+
             if(conn!=null) {
                 System.out.println("Connected to the database");
             }
@@ -29,12 +30,11 @@ public class Main {
 
             String createTableQuery = "CREATE TABLE AUTHOR (ID VARCHAR(100), NAME VARCHAR(20), BOOK VARCHAR(20));";
 
-
-
-
-
             int result = deleteRow(statement);
-            System.out.println("Number of rows deleted" + result);
+
+            System.out.println("Number of rows deleted: " + result);
+
+            fakerInsertRows(conn);
 
             statement.close();
 
@@ -49,6 +49,23 @@ public class Main {
     static int deleteRow(Statement statement) throws SQLException {
         String deleteQuery = "DELETE FROM AUTHOR WHERE ID='96aeab72-af91-4067-aa3b-ac9221e9f867'";
         return statement.executeUpdate(deleteQuery);
+    }
+
+    static void fakerInsertRows(Connection connection) throws SQLException {
+
+        Faker faker = new Faker();
+        String id = UUID.randomUUID().toString();
+        String name = faker.name().firstName();
+        String bookName = faker.book().title();
+
+        PreparedStatement preparedStatement =
+                connection.prepareStatement("INSERT INTO author values(?, ?, ?);");
+
+        preparedStatement.setString(1, id);
+        preparedStatement.setString(2, name);
+        preparedStatement.setString(3, bookName);
+
+        preparedStatement.executeUpdate();
     }
 
     static void insertRowResultSet(Statement statement) throws SQLException {
@@ -71,6 +88,21 @@ public class Main {
         System.out.println("Row inserted with book name " + bookName);
 
         rs.close();
+    }
 
+    static void deleteResultSet(Statement statement) throws SQLException {
+
+        String selectQuery = "SELECT * FROM AUTHOR";
+
+        ResultSet rs = statement.executeQuery(selectQuery);
+
+        while (rs.next()) {
+           String name = rs.getString("Name");
+           if(name.equals("Shon")) {
+               //rs.deleteRow();
+
+               rs.updateString("book", "John");
+           }
+        }
     }
 }
