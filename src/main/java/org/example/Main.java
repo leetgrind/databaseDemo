@@ -29,22 +29,12 @@ public class Main {
 
             String createTableQuery = "CREATE TABLE AUTHOR (ID VARCHAR(100), NAME VARCHAR(20), BOOK VARCHAR(20));";
 
-            String selectQuery = "SELECT * FROM AUTHOR";
 
-            Faker faker = new Faker();
 
-            ResultSet rs = statement.executeQuery(selectQuery);
 
-            String name = faker.name().firstName();
-            String bookName = faker.book().title();
 
-            rs.moveToInsertRow();
-            rs.updateString("ID", UUID.randomUUID().toString());
-            rs.updateString("NAME", name);
-            rs.updateString("BOOK", bookName);
-            rs.insertRow();
-
-            System.out.println("Row inserted with book name " + bookName);
+            int result = deleteRow(statement);
+            System.out.println("Number of rows deleted" + result);
 
             statement.close();
 
@@ -53,6 +43,34 @@ public class Main {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
+
+    }
+
+    static int deleteRow(Statement statement) throws SQLException {
+        String deleteQuery = "DELETE FROM AUTHOR WHERE ID='96aeab72-af91-4067-aa3b-ac9221e9f867'";
+        return statement.executeUpdate(deleteQuery);
+    }
+
+    static void insertRowResultSet(Statement statement) throws SQLException {
+
+        String selectQuery = "SELECT * FROM AUTHOR";
+
+        Faker faker = new Faker();
+
+        ResultSet rs = statement.executeQuery(selectQuery);
+
+        String name = faker.name().firstName();
+        String bookName = faker.book().title();
+
+        rs.moveToInsertRow();
+        rs.updateString("ID", UUID.randomUUID().toString());
+        rs.updateString("NAME", name);
+        rs.updateString("BOOK", bookName);
+        rs.insertRow();
+
+        System.out.println("Row inserted with book name " + bookName);
+
+        rs.close();
 
     }
 }
